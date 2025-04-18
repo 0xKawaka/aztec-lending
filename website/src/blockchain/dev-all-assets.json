@@ -1,0 +1,12 @@
+{
+  "0x041ab1c957f7d272f42dc0f745fe0017a94576b30797bf76811a180d740e33e8": {
+    "name": "Collateral",
+    "ticker": "COL",
+    "decimals": 9
+  },
+  "0x232bb20313b76cc4be1b1f9f5e1477d404f988c83a19dc231f68153e34ebe6bb": {
+    "name": "Borrow",
+    "ticker": "BOR",
+    "decimals": 9
+  }
+}
