@@ -30,6 +30,7 @@ const typedBorrowableAssets = borrowableAssets as string[];
 function App() {
   const [collateralContract, setCollateralContract] = useState<TokenContract | null>(null);
   const [collateralBalance, setCollateralBalance] = useState<bigint>(0n);
+  const [collateralBalancePrivate, setCollateralBalancePrivate] = useState<bigint>(0n);
   const [collateralPrice, setCollateralPrice] = useState<bigint>(0n);
   const [lendingContract, setLendingContract] = useState<LendingContract | null>(null);
   const [loanToValueMax, setLoanToValueMax] = useState<bigint>(0n);
@@ -44,6 +45,7 @@ function App() {
   const [isBorrowing, setIsBorrowing] = useState(false);
   const [maxBorrowableAmount, setMaxBorrowableAmount] = useState<bigint>(0n);
   const [collateralValue, setCollateralValue] = useState<bigint>(0n);
+  const [collateralValuePrivate, setCollateralValuePrivate] = useState<bigint>(0n);
   const [depositedCollateralValue, setDepositedCollateralValue] = useState<bigint>(0n);
   const [depositPrivateLoading, setDepositPrivateLoading] = useState(false);
   const [borrowPrivateLoading, setBorrowPrivateLoading] = useState(false);
@@ -69,6 +71,8 @@ function App() {
         setCollateralContract(tokenContract);
         const collateralBalance = await tokenContract.methods.balance_of_public(address).simulate();
         setCollateralBalance(collateralBalance);
+        const collateralBalancePrivate = await tokenContract.methods.balance_of_private(address).simulate();
+        setCollateralBalancePrivate(collateralBalancePrivate);
 
         const priceFeedContract = await PriceFeedContract.at(AztecAddress.fromString(devContracts.priceFeed), wallet);
         const collateralPrice = await priceFeedContract.methods.get_price(0).simulate();
@@ -84,7 +88,11 @@ function App() {
       const value = (collateralBalance * collateralPrice) / (10n ** BigInt(typedAllAssets[typedCollateralAssets[0]]?.decimals));
       setCollateralValue(value);
     }
-  }, [collateralBalance, collateralPrice]);
+    if (collateralBalancePrivate && collateralPrice) {
+      const value = (collateralBalancePrivate * collateralPrice) / (10n ** BigInt(typedAllAssets[typedCollateralAssets[0]]?.decimals));
+      setCollateralValuePrivate(value);
+    }
+  }, [collateralBalance, collateralPrice, collateralBalancePrivate]);
 
   useEffect(() => {
     if (collateralAmount && collateralPrice) {
@@ -189,7 +197,7 @@ function App() {
           address,
           amountBigInt,
           nonce,
-          0n,
+          wallet.getSecretKey(),
           address,
           AztecAddress.fromString(collateralAssetAddress)
         ).send({ authWitnesses: [transferToPublicAuthwit] }).wait();
@@ -220,14 +228,18 @@ function App() {
         
         console.log("Public deposit receipt:", txReceipt);
       }
-      
+
       const position = await lendingContract.methods.get_position(address).simulate();
       setCollateralAmount(position.collateral);
       
-      // Update collateral balance after deposit
-      const updatedBalance = await collateralContract.methods.balance_of_public(address).simulate();
-      setCollateralBalance(updatedBalance);
-      
+      if(isPrivate) {
+        const updatedBalance = await collateralContract.methods.balance_of_private(address).simulate();
+        setCollateralBalancePrivate(updatedBalance);
+      }
+      else {
+        const updatedBalance = await collateralContract.methods.balance_of_public(address).simulate();
+        setCollateralBalance(updatedBalance);
+      }
       setDepositAmount('');
     } catch (error) {
       console.error(`Error ${isPrivate ? 'privately' : 'publicly'} depositing collateral:`, error);
@@ -255,9 +267,8 @@ function App() {
       const amountBigInt = parseTokenAmount(borrowAmount, assetInfo.decimals);
 
       if (isPrivate) {
-        const secret = Fr.random();
         const txReceipt = await lendingContract.methods.borrow_private(
-          secret,
+          wallet.getSecretKey(),
           address,
           amountBigInt,
         ).send().wait();
@@ -303,8 +314,12 @@ function App() {
                       <h3>{asset.name} ({asset.ticker})</h3>
                       <p>Decimals: {asset.decimals}</p>
                       <p className="balance-display">
-                        Balance: {formatTokenAmount(collateralBalance, asset.decimals)} {asset.ticker}
+                        Public balance: {formatTokenAmount(collateralBalance, asset.decimals)} {asset.ticker}
                         <span className="value-display"> (${formatUsdValue(collateralValue, asset.decimals)})</span>
+                      </p>
+                      <p className="balance-display">
+                        Private balance: {formatTokenAmount(collateralBalancePrivate, asset.decimals)} {asset.ticker}
+                        <span className="value-display"> (${formatUsdValue(collateralValuePrivate, asset.decimals)})</span>
                       </p>
                       <p className="price-display">
                         Price: ${formatUsdValue(collateralPrice, asset.decimals)}

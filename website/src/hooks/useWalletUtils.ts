@@ -1,15 +1,15 @@
 import { useContext } from 'react';
 import { WalletContext } from '../contexts/WalletContext';
-import { AztecAddress, AccountWallet } from '@aztec/aztec.js';
+import { AztecAddress, AccountWalletWithSecretKey } from '@aztec/aztec.js';
 
 /**
  * Combined hook that provides all wallet utilities
  * @returns All wallet functionality in one place
  */
 export function useWalletUtils(): {
-  wallet: AccountWallet | undefined;
+  wallet: AccountWalletWithSecretKey | undefined;
   address: AztecAddress | undefined;
-  availableWallets: AccountWallet[];
+  availableWallets: AccountWalletWithSecretKey[];
   switchWallet: (walletIndex: number) => void;
   isLoading: boolean;
 } {

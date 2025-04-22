@@ -19,7 +19,7 @@ async function main() {
   const collatToken = await TokenContract.deploy(ownerWallet, ownerAddress, 'Collateral', 'COL', 9)
     .send()
     .deployed();
-  const borrowedToken = await TokenContract.deploy(ownerWallet, ownerAddress, 'Borrow', 'BOR', 9)
+  const borrowedToken = await TokenContract.deploy(ownerWallet, ownerAddress, 'StableBorrow', 'BOR', 9)
     .send()
     .deployed();
 
@@ -52,7 +52,9 @@ async function main() {
 
   await collatToken.methods.set_minter(ownerAddress, true).send().wait();
   await borrowedToken.methods.set_minter(lending.address, true).send().wait();
-  await collatToken.methods.mint_to_public(ownerAddress, 1000n * 10n ** 9n).send().wait(); 
+  await collatToken.methods.mint_to_public(ownerAddress, 1000n * 10n ** 9n).send().wait();
+  await collatToken.methods.mint_to_private(ownerAddress, ownerAddress, 333n * 10n ** 9n).send().wait();
+  
 
   await priceFeed.methods.set_price(0n, 3n * 10n ** 9n).send().wait();
 

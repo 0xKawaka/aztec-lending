@@ -1,11 +1,11 @@
 import { ReactNode, createContext, useEffect, useState } from 'react';
-import { AztecAddress, AccountWallet, createPXEClient, waitForPXE } from '@aztec/aztec.js';
+import { AztecAddress, AccountWalletWithSecretKey, createPXEClient, waitForPXE } from '@aztec/aztec.js';
 import { getInitialTestAccountsWallets } from '@aztec/accounts/testing';
 
 interface WalletContextType {
-  wallet: AccountWallet | undefined;
+  wallet: AccountWalletWithSecretKey | undefined;
   address: AztecAddress | undefined;
-  availableWallets: AccountWallet[];
+  availableWallets: AccountWalletWithSecretKey[];
   switchWallet: (walletIndex: number) => void;
   isLoading: boolean;
 }
@@ -26,9 +26,9 @@ interface WalletProviderProps {
 }
 
 export const WalletProvider = ({ children, pxeUrl }: WalletProviderProps) => {
-  const [wallet, setWallet] = useState<AccountWallet>();
+  const [wallet, setWallet] = useState<AccountWalletWithSecretKey>();
   const [address, setAddress] = useState<AztecAddress>();
-  const [availableWallets, setAvailableWallets] = useState<AccountWallet[]>([]);
+  const [availableWallets, setAvailableWallets] = useState<AccountWalletWithSecretKey[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
