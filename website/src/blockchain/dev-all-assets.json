@@ -1,10 +1,10 @@
 {
-  "0x1654da0045fcf864a047469f5cb7b3378f8933f330539451e77870cdf4f1ddb5": {
+  "0x25c5600f0a8d2e1bc1e19ac55081da6c4131ba646a51f832a5a1a7e3f29905f0": {
     "name": "Collateral",
     "ticker": "COL",
     "decimals": 9
   },
-  "0x0b9868fd23106a173d0b23fe357ff1e59ca99d77955ed00532e6abcc7c90b3ba": {
+  "0x21f1baa5610358d5da6ade05da13191ad6107963173521ba42a877d6ce503235": {
     "name": "Borrow",
     "ticker": "BOR",
     "decimals": 9
